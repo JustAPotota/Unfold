@@ -7,6 +7,9 @@ local protoc = require("pb.protoc")
 protoc.unknown_module = ""
 protoc.unknown_type = ""
 protoc.include_imports = true
+protoc:load(sys.load_resource("/proto/liveupdate_ddf.proto"))
+
+local path_sep = (sys.get_sys_info().platform == "Windows" and "\\" or "/")
 
 -- Helper functions
 local function read(filename)
@@ -41,7 +44,7 @@ function M.hex_string(h)
 end
 
 function M.enclosing_folder(filename)
-	return filename:match("(.+)/[^/]+$")
+	return filename:match("(.+)" .. path_sep .. "[^" .. path_sep .. "]+$")
 end
 
 -- Main functions
@@ -86,10 +89,7 @@ function M.read_index(filename)
 end
 
 function M.read_manifest(filename)
-	protoc:load(sys.load_resource("/proto/liveupdate_ddf.proto"))
-
-	local decoded = pb.decode(".dmLiveUpdateDDF.ManifestFile", read(filename))
-	return decoded
+	return pb.decode(".dmLiveUpdateDDF.ManifestFile", read(filename))
 end
 
 function M.convert_hashes(manifest)
