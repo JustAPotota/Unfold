@@ -80,7 +80,7 @@ function init(self)
 end
 
 function on_input(self, action_id, action)
-	button(self, "select_bundle", "#2b2b2b", "#212121", action_id, action, function(self)
+	button(self, "select_bundle", "#2b2b2b", "#363636", action_id, action, function(self)
 		local code, path = diags.open_folder()
 		if code == 1 then
 			self.bundle_path = path
@@ -88,7 +88,7 @@ function on_input(self, action_id, action)
 			autofit_text(self.nodes.bundle_path_text)
 		end
 	end)
-	button(self, "select_output", "#2b2b2b", "#212121", action_id, action, function(self)
+	button(self, "select_output", "#2b2b2b", "#363636", action_id, action, function(self)
 		local code, path = diags.open_folder()
 		if code == 1 then
 			self.output_path = path
