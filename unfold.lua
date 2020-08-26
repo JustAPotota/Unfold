@@ -2,6 +2,7 @@ local M = {}
 
 -- Modules
 local protoc = require("pb.protoc")
+local sio = require("sio")
 
 -- Set up protoc
 protoc.unknown_module = ""
@@ -12,19 +13,6 @@ protoc:load(sys.load_resource("/proto/liveupdate_ddf.proto"))
 local path_sep = (sys.get_sys_info().platform == "Windows" and "\\" or "/")
 
 -- Helper functions
-local function read(filename)
-	local file = assert(io.open(filename, "rb"))
-	local data = file:read("*a")
-	file:close()
-	return data
-end
-
-local function write(filename, data)
-	local file = assert(io.open(filename, "wb"))
-	assert(file:write(data))
-	file:close()
-end
-
 function M.read_int(f)
 	local char = f:read(4)
 	local total = ""
@@ -89,7 +77,7 @@ function M.read_index(filename)
 end
 
 function M.read_manifest(filename)
-	return pb.decode(".dmLiveUpdateDDF.ManifestFile", read(filename))
+	return pb.decode(".dmLiveUpdateDDF.ManifestFile", sio.read(filename))
 end
 
 function M.convert_hashes(manifest)

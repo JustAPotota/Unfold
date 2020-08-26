@@ -1,20 +1,8 @@
 local protoc = require("pb.protoc")
 local unfold = require("unfold")
+local sio = require("sio")
 
 local path_sep = (sys.get_sys_info().platform == "Windows" and "\\" or "/")
-
-local function read(filename)
-	local file = assert(io.open(filename, "rb"))
-	local data = file:read("*a")
-	file:close()
-	return data
-end
-
-local function write(filename, data)
-	local file = assert(io.open(filename, "wb"))
-	assert(file:write(data))
-	file:close()
-end
 
 local function mkdir(filename)
 	-- Very hack-y workaround, will make a better solution
@@ -109,7 +97,7 @@ function on_input(self, action_id, action)
 		gui.set_color(self.nodes.status, hex_to_v4("#ffffff"))
 		gui.set_text(self.nodes.status, "")
 
-		-- Remove ending slashes if they exist
+		-- Remove ending slash if it exists
 		if self.bundle_path:sub(-1,-1) == path_sep then
 			self.bundle_path = self.bundle_path:sub(1,-2)
 		end
@@ -128,7 +116,7 @@ function on_input(self, action_id, action)
 			return
 		end
 
-		local arc_data = read(self.bundle_path .. path_sep .. "game.arcd")
+		local arc_data = sio.read(self.bundle_path .. path_sep .. "game.arcd")
 
 		gui.set_text(self.nodes.status, "Reading index...")
 		local index = unfold.read_index(self.bundle_path .. path_sep .. "game.arci")
@@ -145,7 +133,7 @@ function on_input(self, action_id, action)
 			if v.url then
 				local url = self.output_path .. (sys.get_sys_info().platform == "Windows" and to_windows(v.url) or v.url)
 				mkdir(unfold.enclosing_folder(url))
-				write(url, v.data)
+				sio.write(url, v.data)
 			end
 		end
 
