@@ -72,6 +72,7 @@ local function switch_page(self, to)
 		else
 			gui.set_enabled(v, false)
 			gui.set_enabled(gui.get_node(i .. "_tab_light"), false)
+			gui.set_color(gui.get_node(i .. "_tab"), hex_to_v4("#808080"))
 		end
 	end
 	self.current_page = to
