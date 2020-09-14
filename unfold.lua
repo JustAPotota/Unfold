@@ -3,14 +3,13 @@ local M = {}
 -- Modules
 local protoc = require("pb.protoc")
 local sio = require("sio")
+local utils = require("utils")
 
 -- Set up protoc
 protoc.unknown_module = ""
 protoc.unknown_type = ""
 protoc.include_imports = true
 protoc:load(sys.load_resource("/proto/liveupdate_ddf.proto"))
-
-local path_sep = (sys.get_sys_info().platform == "Windows" and "\\" or "/")
 
 -- Helper functions
 function M.read_int(f)
@@ -23,6 +22,19 @@ function M.read_int(f)
 	--return (string.unpack(">i", f:read(4)))
 end
 
+function M.build_int(n)
+	local h = bit.tohex(n)
+	local s = ""
+	for i=1,7,2 do
+		s = s .. string.char(tonumber(h:sub(i,i+1), 16))
+	end
+	return s
+end
+
+function M.build_long(n)
+	return M.build_int(bit.rshift(n, 32)) .. M.build_int(n)
+end
+
 function M.read_hash(f, length)
 	return string.format(string.rep("%02x", length), string.byte(f:read(length), 1, -1))
 end
@@ -31,9 +43,7 @@ function M.hex_string(h)
 	return string.format(string.rep("%02x", #h), string.byte(h, 1, -1))
 end
 
-function M.enclosing_folder(filename)
-	return filename:match("(.+)" .. path_sep .. "[^" .. path_sep .. "]+$")
-end
+
 
 -- Main functions
 function M.read_index(filename)
@@ -76,8 +86,32 @@ function M.read_index(filename)
 	return index
 end
 
+function M.write(bundle_dir, index, manifest, entries)
+	local arcd = io.open(bundle_dir .. "/game.arcd", "wb")
+	local arci = io.open(bundle_dir .. "/game.arci", "wb")
+	local dman = io.open(bundle_dir .. "/game.dmanifest", "wb")
+
+	arci:write(M.build_int(0)) -- Version
+	arci:write(M.build_int(0)) -- Padding
+	arci:write(M.build_long(0))
+	arci:write(M.build_int(0)) -- Entry count
+	arci:write(M.build_int(0)) -- Entry offset
+	arci:write(M.build_int(0)) -- Hash length
+	arci:write(M.build_int(index.hash_length))
+
+	for i=#entries-1,0,-1 do
+		entry = entries[i]
+		if entry.compressed then
+		end
+	end
+end
+
 function M.read_manifest(filename)
 	return pb.decode(".dmLiveUpdateDDF.ManifestFile", sio.read(filename))
+end
+
+function M.build_manifest(manifest)
+	return pb.encode(".dmLiveUpdateDDF.ManifestFile", sio.read(filename))
 end
 
 function M.convert_hashes(manifest)

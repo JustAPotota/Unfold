@@ -1,24 +1,7 @@
 local protoc = require("pb.protoc")
 local unfold = require("unfold")
 local sio = require("sio")
-
-local path_sep = (sys.get_sys_info().platform == "Windows" and "\\" or "/")
-
-local function mkdir(filename)
-	-- Very hack-y workaround, will make a better solution
-	local path = (filename:sub(1,1) == path_sep and path_sep or "")
-	for i in filename:gmatch("([^" .. path_sep .. "]+)" .. path_sep .. "?") do
-		path = path .. i .. path_sep
-		
-		lfs.mkdir(path)
-	end
-end
-
-local function file_exists(filename)
-	local exists = io.open(filename, "rb")
-	if exists then io.close(exists) end
-	return exists ~= nil
-end
+local utils = require("utils")
 
 local function get_nodes(l)
 	local nodes = {}
@@ -161,40 +144,43 @@ function on_input(self, action_id, action)
 		end
 		set_status(self.nodes.export_status, "", false)
 
+		self.bundle_path = utils.to_unix(self.bundle_path)
+		self.output_path = utils.to_unix(self.output_path)
+
 		-- Remove ending slash if it exists
-		if self.bundle_path:sub(-1,-1) == path_sep then
+		if self.bundle_path:sub(-1,-1) == "/" then
 			self.bundle_path = self.bundle_path:sub(1,-2)
 		end
-		if self.output_path:sub(-1,-1) == path_sep then
+		if self.output_path:sub(-1,-1) == "/" then
 			self.output_path = self.output_path:sub(1,-2)
 		end
 
-		print("Bundle path: " .. self.bundle_path)
-		print("Output path: " .. self.output_path)
+		print("Bundle path: " .. utils.to_platform(self.bundle_path))
+		print("Output path: " .. utils.to_platform(self.output_path))
 
-		if not file_exists(self.bundle_path .. path_sep .. "game.arci") or
-		not file_exists(self.bundle_path  .. path_sep .. "game.arcd") or
-		not file_exists(self.bundle_path .. path_sep .. "game.dmanifest") then
+		if not file_exists(self.bundle_path .. "/game.arci") or
+		not file_exists(self.bundle_path  .. "/game.arcd") or
+		not file_exists(self.bundle_path .. "/game.dmanifest") then
 			set_status(self.nodes.export_status, "Not a valid bundle folder!", true)
 			return
 		end
 
-		local arc_data = sio.read(self.bundle_path .. path_sep .. "game.arcd")
-		local index = unfold.read_index(self.bundle_path .. path_sep .. "game.arci")
-		local manifest = unfold.read_manifest(self.bundle_path .. path_sep .. "game.dmanifest")
+		local arc_data = sio.read(self.bundle_path .. "/game.arcd")
+		local index = unfold.read_index(self.bundle_path .. "/game.arci")
+		local manifest = unfold.read_manifest(self.bundle_path .. "/game.dmanifest")
 		manifest = unfold.convert_hashes(manifest)
 		local entries = unfold.get_entries(arc_data, index, manifest)
 
-		set_status(self.nodes.export_status, "Writing to " .. self.output_path .. "...", false)
+		set_status(self.nodes.export_status, "Writing to " .. utils.to_platform(self.output_path) .. "...", false)
 		for i,v in ipairs(entries) do
 			if v.url then
-				local url = self.output_path .. (sys.get_sys_info().platform == "Windows" and to_windows(v.url) or v.url)
+				local url = utils.to_platform(self.output_path .. v.url)
 				mkdir(unfold.enclosing_folder(url))
 				sio.write(url, v.data)
 			end
 		end
 
-		set_status(self.nodes.export_status, "Done! Written to " .. self.output_path, false)
+		set_status(self.nodes.export_status, "Done! Written to " .. utils.to_platform(self.output_path), false)
 	end)
 
 	-- Import -------------------------
