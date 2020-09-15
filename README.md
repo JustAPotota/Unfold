@@ -37,7 +37,7 @@ The archive index. It's a binary file with a header, a list of hashes of each fi
 | 0x1e   | ???  | The MD5 hash of the index file. Its length is determined by [MD5_HASH_DIGEST_BYTE_LENGTH](https://github.com/defold/defold/blob/9991d949988c4da04f08b1aed386425035cdae3c/com.dynamo.cr/com.dynamo.cr.bob/src/com/dynamo/bob/archive/ArchiveBuilder.java#L46) (0x10 at the time of writing) |
 
 ### Hash Format
-These are hashes whose length is defined in the index header. Each hash is stored in a block of size [HASH_MAX_LENGTH](https://github.com/defold/defold/blob/9991d949988c4da04f08b1aed386425035cdae3c/com.dynamo.cr/com.dynamo.cr.bob/src/com/dynamo/bob/archive/ArchiveBuilder.java#L44), the rest of the space gets filled in with zeros. The hash algorithm used is defined by the manifest header. Hashes seem to only be used as an identifier, not to check that the files are valid.
+These are hashes whose lengths are defined in the index header. Each hash is stored in a block of size [HASH_MAX_LENGTH](https://github.com/defold/defold/blob/9991d949988c4da04f08b1aed386425035cdae3c/com.dynamo.cr/com.dynamo.cr.bob/src/com/dynamo/bob/archive/ArchiveBuilder.java#L44), the rest of the space gets filled in with zeros. The hash algorithm used is defined by the manifest header. Hashes seem to only be used as an identifier, not to check that the files are valid.
 
 ### Entry Format
 | Offset | Size | Description |
