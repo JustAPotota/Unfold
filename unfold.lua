@@ -43,6 +43,20 @@ function M.hex_string(h)
 	return string.format(string.rep("%02x", #h), string.byte(h, 1, -1))
 end
 
+-- Run function for each file in directory
+function M.dir_iter(path, for_each)
+	for file in lfs.dir(path) do
+		if file ~= "." and file ~= ".." then
+			local f = path .. "/" .. file
+			local attr = lfs.attributes(f)
+			if attr.mode == "directory" then
+				M.dir_iter(f, for_each)
+			else
+				for_each(f)
+			end
+		end
+	end
+end
 
 
 -- Main functions
@@ -104,6 +118,20 @@ function M.write(bundle_dir, index, manifest, entries)
 		if entry.compressed then
 		end
 	end
+end
+
+function M.read_compiled_files(path)
+	local entries = {}
+
+	M.dir_iter(path .. "/compiled", function(f)
+		local e = {} -- New entry
+
+		e.data = sio.read(utils.to_platform(f))
+		e.size = #e.data
+		e.url = f:gsub(path .. "/compiled", "") -- Convert from system path to project path
+
+		table.insert(entries, e)
+	end)
 end
 
 function M.read_manifest(filename)
