@@ -158,9 +158,9 @@ function on_input(self, action_id, action)
 		print("Bundle path: " .. utils.to_platform(self.bundle_path))
 		print("Output path: " .. utils.to_platform(self.output_path))
 
-		if not file_exists(self.bundle_path .. "/game.arci") or
-		not file_exists(self.bundle_path  .. "/game.arcd") or
-		not file_exists(self.bundle_path .. "/game.dmanifest") then
+		if not utils.file_exists(self.bundle_path .. "/game.arci") or
+		not utils.file_exists(self.bundle_path  .. "/game.arcd") or
+		not utils.file_exists(self.bundle_path .. "/game.dmanifest") then
 			set_status(self.nodes.export_status, "Not a valid bundle folder!", true)
 			return
 		end
@@ -175,7 +175,7 @@ function on_input(self, action_id, action)
 		for i,v in ipairs(entries) do
 			if v.url then
 				local url = utils.to_platform(self.output_path .. v.url)
-				mkdir(unfold.enclosing_folder(url))
+				utils.mkdir(utils.enclosing_folder(url))
 				sio.write(url, v.data)
 			end
 		end
