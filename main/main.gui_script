@@ -139,7 +139,7 @@ function on_input(self, action_id, action)
 			set_status(self.nodes.export_status, "You have to select a bundle folder!", true)
 			return
 		elseif not self.output_path then
-			set_status(self.nodes.export_status, "You have to select and output folder!", true)
+			set_status(self.nodes.export_status, "You have to select an output folder!", true)
 			return
 		end
 		set_status(self.nodes.export_status, "", false)
