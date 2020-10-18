@@ -165,10 +165,12 @@ function on_input(self, action_id, action)
 			return
 		end
 
+		utils.erase_dir(utils.to_platform(self.output_path))
+		
 		local arc_data = sio.read(self.bundle_path .. "/game.arcd")
 		local index = unfold.read_index(self.bundle_path .. "/game.arci")
 		local manifest = unfold.read_manifest(self.bundle_path .. "/game.dmanifest")
-		--manifest = unfold.convert_hashes(manifest)
+		manifest = unfold.convert_hashes(manifest)
 		local entries = unfold.get_entries(arc_data, index, manifest)
 
 		set_status(self.nodes.export_status, "Writing to " .. utils.to_platform(self.output_path) .. "...", false)

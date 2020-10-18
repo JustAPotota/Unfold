@@ -43,21 +43,6 @@ function M.hex_string(h)
 	return string.format(string.rep("%02x", #h), string.byte(h, 1, -1))
 end
 
--- Run function for each file in directory
-function M.dir_iter(path, for_each)
-	for file in lfs.dir(path) do
-		if file ~= "." and file ~= ".." then
-			local f = path .. "/" .. file
-			local attr = lfs.attributes(f)
-			if attr.mode == "directory" then
-				M.dir_iter(f, for_each)
-			else
-				for_each(f)
-			end
-		end
-	end
-end
-
 
 -- Main functions
 function M.read_index(filename)
@@ -123,7 +108,7 @@ end
 function M.read_compiled_files(path)
 	local entries = {}
 
-	M.dir_iter(path .. "/compiled", function(f)
+	utils.dir_iter(path .. "/compiled", function(f)
 		local e = {} -- New entry
 
 		e.data = sio.read(utils.to_platform(f))
@@ -147,9 +132,9 @@ function M.convert_hashes(manifest)
 		v.hash.data = M.hex_string(v.hash.data)
 		v.url_hash = string.format("%x", v.url_hash)
 	end
-	for i,v in ipairs(manifest.data.engine_versions) do
+	--[[for i,v in ipairs(manifest.data.engine_versions) do
 		v.data = M.hex_string(v.data)
-	end
+	end]]
 	return manifest
 end
 
