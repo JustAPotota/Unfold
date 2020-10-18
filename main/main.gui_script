@@ -174,7 +174,7 @@ function on_input(self, action_id, action)
 		set_status(self.nodes.export_status, "Writing to " .. utils.to_platform(self.output_path) .. "...", false)
 		for i,v in ipairs(entries) do
 			if v.url then
-				local url = utils.to_platform(self.output_path .. v.url)
+				local url = utils.to_platform(self.output_path .. "/compiled" .. v.url)
 				utils.mkdir(utils.enclosing_folder(url))
 				sio.write(url, v.data)
 			end
