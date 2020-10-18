@@ -168,7 +168,7 @@ function on_input(self, action_id, action)
 		local arc_data = sio.read(self.bundle_path .. "/game.arcd")
 		local index = unfold.read_index(self.bundle_path .. "/game.arci")
 		local manifest = unfold.read_manifest(self.bundle_path .. "/game.dmanifest")
-		manifest = unfold.convert_hashes(manifest)
+		--manifest = unfold.convert_hashes(manifest)
 		local entries = unfold.get_entries(arc_data, index, manifest)
 
 		set_status(self.nodes.export_status, "Writing to " .. utils.to_platform(self.output_path) .. "...", false)
@@ -177,8 +177,26 @@ function on_input(self, action_id, action)
 				local url = utils.to_platform(self.output_path .. "/compiled" .. v.url)
 				utils.mkdir(utils.enclosing_folder(url))
 				sio.write(url, v.data)
+				v.data = nil
 			end
 		end
+
+		local info = {
+			index = {
+				version = index.version,
+				hash_length = index.hash_length
+			},
+			manifest = {
+				archive_identifier = manifest.archive_identifier,
+				signature = manifest.signature,
+				data = {
+					header = manifest.data.header,
+					engine_versions = manifest.data.engine_versions
+				}
+			}
+		}
+
+		sio.write(utils.to_platform(self.output_path .. "/info.json"), cjson.encode(info))
 
 		set_status(self.nodes.export_status, "Done! Written to " .. utils.to_platform(self.output_path), false)
 	end)
