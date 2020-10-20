@@ -182,6 +182,7 @@ function on_input(self, action_id, action)
 				v.data = nil
 			end
 		end
+		sio.write(utils.to_platform(self.output_path .. "/compiled/game.projectc"), sio.read(utils.to_platform(self.bundle_path .. "/game.projectc")))
 
 		local info = {
 			index = {
