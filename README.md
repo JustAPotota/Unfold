@@ -6,8 +6,9 @@ WIP modding tool for the [Defold game engine](https://defold.com/).
 
 ## Planned Features
 - Import assets
-- Decompress/recompress assets
+- Decompile/recompile assets
   - Requires a [native extension](https://defold.com/manuals/extensions/) version of [lua-lz4](https://github.com/witchu/lua-lz4)
+- Mod loading
 
 ## Installation
 Grab a pre-built version from the [releases section](https://github.com/JustAPotota/Unfold/releases) or download the project and build it using Defold.
@@ -27,7 +28,7 @@ The archive index. It's a binary file with a header, a list of hashes of each fi
 |--------|------|-------------|
 | 0x0    | 0x4  | Index version. It's 4 at the time of writing |
 | 0x4    | 0x4  | Padding                                        |
-| 0x8    | 0x8  | "UserData, used in runtime to distinguish between if the index and resources are memory mapped or loaded from disk", according to the source code. Not sure what this means |
+| 0x8    | 0x8  | "UserData, used in runtime to distinguish between if the index and resources are memory mapped or loaded from disk", according to the [source code](https://github.com/defold/defold/blob/c8987e4f119497aaee90afd8c99f464881a8e140/com.dynamo.cr/com.dynamo.cr.bob/src/com/dynamo/bob/archive/ArchiveBuilder.java#L172). Not sure what this means |
 | 0x10   | 0x4  | The number of entries in the index             |
 | 0x14   | 0x4  | Starting offset of the entry list              |
 | 0x16   | 0x4  | Starting offset of the hash list               |
