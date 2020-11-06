@@ -1,11 +1,7 @@
 script: "/main/main.gui_script"
 fonts {
   name: "system_font"
-  font: "/builtins/fonts/system_font.font"
-}
-fonts {
-  name: "roboto-regular"
-  font: "/assets/font/roboto-regular.font"
+  font: "/assets/font/system_font.font"
 }
 textures {
   name: "gui"
@@ -160,7 +156,7 @@ nodes {
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: "Output Folder"
-  font: "roboto-regular"
+  font: "system_font"
   id: "output_text"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
@@ -278,7 +274,7 @@ nodes {
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: ""
-  font: "roboto-regular"
+  font: "system_font"
   id: "output_path_text"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
@@ -396,7 +392,7 @@ nodes {
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: "..."
-  font: "roboto-regular"
+  font: "system_font"
   id: "select_output_text"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
@@ -459,7 +455,7 @@ nodes {
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: "Exporting will erase everything in the ouput folder!"
-  font: "roboto-regular"
+  font: "system_font"
   id: "output_warning"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
@@ -577,7 +573,7 @@ nodes {
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: "Export"
-  font: "roboto-regular"
+  font: "system_font"
   id: "export_button_text"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
@@ -640,7 +636,7 @@ nodes {
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: ""
-  font: "roboto-regular"
+  font: "system_font"
   id: "export_status"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
@@ -812,7 +808,7 @@ nodes {
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: "Input Folder"
-  font: "roboto-regular"
+  font: "system_font"
   id: "import_input_text"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
@@ -930,7 +926,7 @@ nodes {
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: ""
-  font: "roboto-regular"
+  font: "system_font"
   id: "import_input_path_text"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
@@ -1048,7 +1044,7 @@ nodes {
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: "..."
-  font: "roboto-regular"
+  font: "system_font"
   id: "import_select_input_text"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
@@ -1166,7 +1162,7 @@ nodes {
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: "Import"
-  font: "roboto-regular"
+  font: "system_font"
   id: "import_button_text"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
@@ -1229,7 +1225,7 @@ nodes {
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: ""
-  font: "roboto-regular"
+  font: "system_font"
   id: "import_status"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
@@ -1292,7 +1288,7 @@ nodes {
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: "Not currently implemented"
-  font: "roboto-regular"
+  font: "system_font"
   id: "text"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
@@ -1464,7 +1460,7 @@ nodes {
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: "Bundle Folder (contains game.arci)"
-  font: "roboto-regular"
+  font: "system_font"
   id: "bundle_text"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
@@ -1582,7 +1578,7 @@ nodes {
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: ""
-  font: "roboto-regular"
+  font: "system_font"
   id: "bundle_path_text"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
@@ -1700,7 +1696,7 @@ nodes {
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: "..."
-  font: "roboto-regular"
+  font: "system_font"
   id: "select_bundle_text"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
@@ -1817,7 +1813,7 @@ nodes {
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: "Setup"
-  font: "roboto-regular"
+  font: "system_font"
   id: "setup_tab"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
@@ -1935,7 +1931,7 @@ nodes {
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: "Export"
-  font: "roboto-regular"
+  font: "system_font"
   id: "export_tab"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
@@ -2053,7 +2049,7 @@ nodes {
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: "Import"
-  font: "roboto-regular"
+  font: "system_font"
   id: "import_tab"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
