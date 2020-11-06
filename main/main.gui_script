@@ -93,15 +93,16 @@ local function set_status(node, text, error)
 		gui.set_color(node, vmath.vector4(1, 1, 1, 1))
 	end
 	gui.set_text(node, text)
+	autofit_text(node)
 end
 
-local function validate_bundle(self, path)
+local function validate_bundle(path)
 	if not path then return "You have to select a bundle folder!" end
 
-	if not utils.file_exists(self.bundle_path .. "/game.arci") or
-	not utils.file_exists(self.bundle_path  .. "/game.arcd") or
-	not utils.file_exists(self.bundle_path .. "/game.dmanifest") then
-		return"Not a valid bundle folder!"
+	if not utils.file_exists(path .. "/game.arci") or
+	not utils.file_exists(path  .. "/game.arcd") or
+	not utils.file_exists(path .. "/game.dmanifest") then
+		return "Not a valid bundle folder!"
 	end
 end
 
@@ -141,17 +142,12 @@ function on_input(self, action_id, action)
 		if code == 1 then
 			self.output_path = path
 			
-			-- Remove ending slash if it exists
-			if self.bundle_path:sub(-1) == "/" then
-				self.bundle_path = self.bundle_path:sub(1,-2)
-			end
-			
 			gui.set_text(self.nodes.output_path_text, path)
 			autofit_text(self.nodes.output_path_text)
 		end
 	end)
 	button(self, "export_button", "#0091ea", "#00b0ff", action_id, action, function(self)
-		local invalid_bundle = validate_bundle(self, self.bundle_path)
+		local invalid_bundle = validate_bundle(self.bundle_path)
 		if invalid_bundle then
 			return set_status(self.nodes.export_status, invalid_bundle, true)
 		else
@@ -226,7 +222,7 @@ function on_input(self, action_id, action)
 	end)
 
 	button(self, "import_button", "#0091ea", "#00b0ff", action_id, action, function(self)
-		local invalid_bundle = validate_bundle(self, self.bundle_path)
+		local invalid_bundle = validate_bundle(self.bundle_path)
 		if invalid_bundle then
 			return set_status(self.nodes.import_status, invalid_bundle, true)
 		else
