@@ -1,4 +1,3 @@
-local protoc = require("pb.protoc")
 local unfold = require("unfold")
 local sio = require("sio")
 local utils = require("utils")
@@ -38,6 +37,7 @@ local function hit_test(node, action_id, action)
 	return touch and hit
 end
 
+-- Convert hex color code to vector4
 local function hex_to_v4(h)
 	h = string.match(h, "%x%x%x%x%x%x")
 	local r = tonumber(h:sub(1,2), 16)/255
@@ -61,6 +61,7 @@ local function switch_page(self, to)
 	self.current_page = to
 end
 
+-- GUI nodes ---------------------
 local function button(self, id, normal_color, highlight_color, action_id, action, on_click)
 	local node = gui.get_node(id)
 	if hit_test(node, action_id, action) then
@@ -85,6 +86,7 @@ local function tab(self, page, action_id, action)
 		switch_page(self, page)
 	end)
 end
+----------------------------------
 
 local function set_status(node, text, error)
 	if error then
@@ -124,7 +126,7 @@ end
 function on_input(self, action_id, action)
 	-- Setup --------------------------
 	tab(self, "setup", action_id, action)
-	
+
 	button(self, "select_bundle", "#2b2b2b", "#363636", action_id, action, function(self)
 		local code, path = diags.open_folder()
 		if code == 1 then
@@ -136,24 +138,25 @@ function on_input(self, action_id, action)
 
 	-- Export -------------------------
 	tab(self, "export", action_id, action)
-	
+
 	button(self, "select_output", "#2b2b2b", "#363636", action_id, action, function(self)
 		local code, path = diags.open_folder()
 		if code == 1 then
 			self.output_path = path
-			
+
 			gui.set_text(self.nodes.output_path_text, path)
 			autofit_text(self.nodes.output_path_text)
 		end
 	end)
 	button(self, "export_button", "#0091ea", "#00b0ff", action_id, action, function(self)
+		-- Validate paths -------------
 		local invalid_bundle = validate_bundle(self.bundle_path)
 		if invalid_bundle then
 			return set_status(self.nodes.export_status, invalid_bundle, true)
 		else
 			set_status(self.nodes.export_status, "", false)
 		end
-		
+
 		if not self.output_path then
 			set_status(self.nodes.export_status, "You have to select an output folder!", true)
 			return
@@ -166,18 +169,23 @@ function on_input(self, action_id, action)
 		if self.output_path:sub(-1) == "/" then
 			self.output_path = self.output_path:sub(1,-2)
 		end
+		---------------------------------
+
 
 		print("Bundle path: " .. utils.to_platform(self.bundle_path))
 		print("Output path: " .. utils.to_platform(self.output_path))
 
+
 		utils.erase_dir(utils.to_platform(self.output_path))
-		
+
+		-- Read and parse archive files
 		local arc_data = sio.read(self.bundle_path .. "/game.arcd")
 		local index = unfold.read_index(self.bundle_path .. "/game.arci")
 		local manifest = unfold.read_manifest(self.bundle_path .. "/game.dmanifest")
 		manifest = unfold.convert_hashes(manifest)
 		local entries = unfold.get_entries(arc_data, index, manifest)
 
+		-- Write files to output dir
 		set_status(self.nodes.export_status, "Writing to " .. utils.to_platform(self.output_path) .. "...", false)
 		for i,v in ipairs(entries) do
 			if v.url then
@@ -189,6 +197,7 @@ function on_input(self, action_id, action)
 		end
 		sio.write(utils.to_platform(self.output_path .. "/compiled/game.projectc"), sio.read(utils.to_platform(self.bundle_path .. "/game.projectc")))
 
+		-- Save some info about the archive for re-importing
 		local info = {
 			index = {
 				version = index.version,
@@ -203,7 +212,6 @@ function on_input(self, action_id, action)
 				}
 			}
 		}
-
 		sio.write(utils.to_platform(self.output_path .. "/info.json"), cjson.encode(info))
 
 		set_status(self.nodes.export_status, "Done! Written to " .. utils.to_platform(self.output_path), false)

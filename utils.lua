@@ -21,7 +21,7 @@ function M.dir_iter(path, for_each, for_each_dir)
 end
 
 function M.mkdir(filename)
-	-- Very hack-y workaround, will make a better solution
+	-- Should make a better solution for this
 	local path = (filename:sub(1,1) == "/" and "/" or "")
 	for i in filename:gmatch("([^/]+)/?") do
 		path = path .. i .. "/"
