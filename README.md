@@ -56,3 +56,6 @@ These are hashes whose lengths are defined in the index header. Each hash is sto
 
 ## game.dmanifest
 This is simply a compiled [Google protobuf](https://developers.google.com/protocol-buffers/) file. The definition file is easy to read, so go check it out [here](https://github.com/defold/defold/blob/9991d949988c4da04f08b1aed386425035cdae3c/engine/resource/proto/liveupdate_ddf.proto).
+
+## Asset Format
+Assets are protobufs that have been compressed in LZ4 block format. The definition files are scattered throughout the Defold repo, but they all use the naming format `*_ddf.proto`, making them easily searchable. The files included in the archive aren't always the same as the ones in the source project. For instance, textures are converted from atlases and image files to `.texturec` and `.texturesetc` file.
