@@ -1,6 +1,6 @@
 [project]
 title = Unfold
-dependencies = https://github.com/Melsoft-Games/defold-protobuf/archive/master.zip,https://github.com/andsve/def-diags/archive/master.zip,https://github.com/britzl/defold-lfs/archive/1.0.1.zip,https://github.com/Melsoft-Games/defold-cjson/archive/master.zip
+dependencies = https://github.com/Melsoft-Games/defold-protobuf/archive/master.zip,https://github.com/andsve/def-diags/archive/master.zip,https://github.com/britzl/defold-lfs/archive/1.0.1.zip,https://github.com/Melsoft-Games/defold-cjson/archive/master.zip,https://github.com/JustAPotota/defold-lz4/archive/v1.0.zip
 custom_resources = proto/
 
 [bootstrap]
