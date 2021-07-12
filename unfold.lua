@@ -1,15 +1,18 @@
 local M = {}
 
 -- Modules
-local protoc = require("pb.protoc")
 local sio = require("sio")
 local utils = require("utils")
+local ddf = require("ddf.ddf")
+local protoc = require("pb.protoc")
 
 -- Set up protoc -----------------
 protoc.unknown_module = ""
 protoc.unknown_type = ""
 protoc.include_imports = true
-protoc:load(sys.load_resource("/proto/liveupdate_ddf.proto"))
+protoc:load(sys.load_resource("/ddf/proto/ddf.proto"))
+protoc:load(sys.load_resource("/proto/resource/liveupdate_ddf.proto"))
+protoc:load(sys.load_resource("/proto/gamesys/texture_set_ddf.proto"))
 ----------------------------------
 
 
@@ -167,6 +170,48 @@ function M.get_entries(archive_data, index, manifest)
 	end
 
 	return entries
+end
+
+local function safe_decode(ddf_type, data)
+	local success, v = pcall(pb.decode, ddf_type, data)
+	if success then
+		return cjson.encode(v)
+	else
+		print("Error decoding file of type " .. ddf_type .. ":\n" .. v)
+	end
+end
+
+function M.decompile_files(entries, out_path)
+	for _,e in ipairs(entries) do
+		local ext = utils.get_extension(e.url)
+		local output = e.data
+		
+		if ext == "fontc" then
+			output = safe_decode("dmRenderDDF.FontDesc", output)
+		elseif ext == "goc" then
+			output = safe_decode(".dmGameObjectDDF.PrototypeDesc", output)
+		elseif ext == "collectionc" then
+			output = safe_decode(".dmGameObjectDDF.CollectionDesc", output)
+		elseif ext == "collisionobjectc" then
+			output = safe_decode(".dmPhysicsDDF.CollisionObjectDesc", output):gsub("extra:", "data:")
+		elseif ext == "soundc" then
+			output = ddf.encode_sound(pb.decode(".dmSoundDDF.SoundDesc", output))
+		elseif ext == "tilemapc" then
+			output = ddf.encode_tilemap(pb.decode("dmGameSystemDDF.TileGrid", output))
+		elseif ext == "texturesetc" then
+			output = safe_decode("dmGameSystemDDF.TextureSet", output)
+		elseif ext == "texturec" then
+			output = safe_decode("dmGraphics.TextureImage", output)
+		end
+
+		if output then
+			local path = out_path .. "/decompiled" .. e.url:sub(1,-2)
+			utils.mkdir(utils.enclosing_folder(path))
+			sio.write(path, output)
+		end
+	end
+
+	sio.write(out_path .. "/decompiled/game.project", sio.read(out_path .. "/compiled/game.projectc"))
 end
 
 return M

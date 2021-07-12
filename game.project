@@ -1,6 +1,6 @@
 [project]
 title = Unfold
-custom_resources = /ddf/proto
+custom_resources = /ddf/proto,/proto
 dependencies#0 = https://github.com/Melsoft-Games/defold-protobuf/archive/master.zip
 dependencies#1 = https://github.com/andsve/def-diags/archive/master.zip
 dependencies#2 = https://github.com/britzl/defold-lfs/archive/1.0.1.zip

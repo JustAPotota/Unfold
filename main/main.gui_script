@@ -164,11 +164,6 @@ function on_input(self, action_id, action)
 		set_status(self.nodes.export_status, "", false)
 
 		self.output_path = utils.to_unix(self.output_path)
-
-		-- Remove ending slash if it exists
-		if self.output_path:sub(-1) == "/" then
-			self.output_path = self.output_path:sub(1,-2)
-		end
 		---------------------------------
 
 
@@ -192,7 +187,6 @@ function on_input(self, action_id, action)
 				local url = utils.to_platform(self.output_path .. "/compiled" .. v.url)
 				utils.mkdir(utils.enclosing_folder(url))
 				sio.write(url, v.data)
-				v.data = nil
 			end
 		end
 		sio.write(utils.to_platform(self.output_path .. "/compiled/game.projectc"), sio.read(utils.to_platform(self.bundle_path .. "/game.projectc")))
@@ -213,6 +207,7 @@ function on_input(self, action_id, action)
 			}
 		}
 		sio.write(utils.to_platform(self.output_path .. "/info.json"), cjson.encode(info))
+		unfold.decompile_files(entries, self.output_path)
 
 		set_status(self.nodes.export_status, "Done! Written to " .. utils.to_platform(self.output_path), false)
 	end)
@@ -244,11 +239,6 @@ function on_input(self, action_id, action)
 		set_status(self.nodes.import_status, "", false)
 
 		self.input_path = utils.to_unix(self.input_path)
-
-		-- Remove ending slash if it exists
-		if self.input_path:sub(-1) == "/" then
-			self.input_path = self.input_path:sub(1,-2)
-		end
 
 		print("Bundle path: " .. utils.to_platform(self.bundle_path))
 		print("Input path: " .. utils.to_platform(self.input_path))
