@@ -159,6 +159,9 @@ function M.get_entries(archive_data, index, manifest)
 
 		-- Get the file data from the archive
 		entry.data = archive_data:sub(entry.resource_offset + 1, entry.resource_offset + entry.compressed_size)
+		if entry.compressed and entry.flags % 2 == 0 then -- Don't try to decompress encrypted files
+			entry.data = lz4.block_decompress_safe(entry.data, entry.size)
+		end
 
 		table.insert(entries, entry)
 	end
