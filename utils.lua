@@ -62,4 +62,8 @@ function M.to_platform(path)
 	return path
 end
 
+function M.get_extension(filename)
+	return filename:match("%.([^%.]+)$")
+end
+
 return M
