@@ -207,7 +207,6 @@ function M.decompile_files(entries, out_path)
 		if output then
 			-- Remove trailing c in resource paths
 			output = output:gsub(': "/.-c"', function(s)
-				print(s)
 				return s:sub(1,-3) .. '"'
 			end)
 			local path = out_path .. "/decompiled" .. e.url:sub(1,-2)
