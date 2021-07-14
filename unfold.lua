@@ -181,19 +181,36 @@ local function safe_decode(ddf_type, data)
 	end
 end
 
+local function fix_collection(collection)
+	if collection.instances then
+		for i,instance in ipairs(collection.instances) do
+			if instance.component_properties then
+				for _,property in ipairs(instance.component_properties) do
+					property.property_decls = nil
+				end
+			end
+
+			-- Remove leading /
+			instance.id = instance.id:sub(2)
+		end
+	end
+	return collection
+end
+
 function M.decompile_files(entries, out_path)
 	for _,e in ipairs(entries) do
 		local ext = utils.get_extension(e.url)
 		local output = e.data
 		
 		if ext == "fontc" then
-			output = safe_decode("dmRenderDDF.FontDesc", output)
+			--output = ddf.encond_font(pb.decode("dmRenderDDF.FontDesc", output))
 		elseif ext == "goc" then
-			output = safe_decode(".dmGameObjectDDF.PrototypeDesc", output)
+			output = ddf.encode_go(pb.decode(".dmGameObjectDDF.PrototypeDesc", output))
 		elseif ext == "collectionc" then
-			output = safe_decode(".dmGameObjectDDF.CollectionDesc", output)
+			local collection = fix_collection(pb.decode(".dmGameObjectDDF.CollectionDesc", output))
+			output = ddf.encode_collection(collection)
 		elseif ext == "collisionobjectc" then
-			output = safe_decode(".dmPhysicsDDF.CollisionObjectDesc", output):gsub("extra:", "data:")
+			output = ddf.encode_collisionobject(pb.decode(".dmPhysicsDDF.CollisionObjectDesc", output))
 		elseif ext == "soundc" then
 			output = ddf.encode_sound(pb.decode(".dmSoundDDF.SoundDesc", output))
 		elseif ext == "tilemapc" then
