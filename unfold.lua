@@ -54,9 +54,10 @@ function M.convert_hashes(manifest)
 		v.hash.data = M.hex_string(v.hash.data)
 		v.url_hash = string.format("%x", v.url_hash)
 	end
-	--[[for i,v in ipairs(manifest.data.engine_versions) do
+	for i,v in ipairs(manifest.data.engine_versions) do
 		v.data = M.hex_string(v.data)
-	end]]
+	end
+	manifest.data.header.project_identifier = M.hex_string(manifest.data.header.project_identifier.data)
 	return manifest
 end
 ----------------------------------
@@ -197,35 +198,79 @@ local function fix_collection(collection)
 	return collection
 end
 
+local function fix_go(go)
+	if go.components then
+		for _,component in ipairs(go.components) do
+			component.property_decls = nil
+
+			if component.component:sub(-6) == "script" and component.properties then
+				local properties = {}
+				for _,property in ipairs(component.properties) do
+					properties[property.id] = property
+				end
+			end
+		end
+	end
+	return go
+end
+
+local ddf_types = {
+	animationset = "dmRigDDF.AnimationSet",
+	camera = "dmGamesysDDF.CameraDesc",
+	collection = function(collection)
+		return ddf.encode_collection(fix_collection(pb.decode("dmGameObjectDDF.CollectionDesc", collection)))
+	end,
+	collectionfactory = "dmGameSystemDDF.CollectionFactoryDesc",
+	collectionproxy = "dmGameSystemDDF.CollectionProxyDesc",
+	collisionobject = "dmPhysicsDDF.CollisionObjectDesc",
+	cubemap = "dmGraphics.Cubemap",
+	display_profiles = "dmRenderDDF.DisplayProfiles",
+	factory = "dmGameSystemDDF.FactoryDesc",
+	--font = "dmRenderDDF.FontDesc",
+	go = "dmGameObjectDDF.PrototypeDesc",
+	gui = "dmGuiDDF.SceneDesc",
+	input_binding = "dmInputDDF.InputBinding",
+	label = "dmGameSystemDDF.LabelDesc",
+	light = "dmGameSystemDDF.LightDesc",
+	material = "dmRenderDDF.MaterialDesc",
+	particlefx = "dmParticleDDF.ParticleFX",
+	render = "dmRenderDDF.RenderPrototypeDesc",
+	sound = "dmSoundDDF.SoundDesc",
+	spinemodel = "dmGameSystemDDF.SpineModelDesc",
+	spinescene = "dmGameSystemDDF.SpineSceneDesc",
+	sprite = "dmGameSystemDDF.SpriteDesc",
+	texture_profiles = "dmGraphics.TextureProfiles",
+	tilemap = "dmGameSystemDDF.TileGrid",
+}
+
+local function fix_dependency_paths(contents)
+	return contents:gsub(': "/.-c"', function(s)
+		return s:sub(1,-3) .. '"'
+	end)
+end
+
+local function decode_file(contents, file_extension)
+	local file_type = ddf_types[file_extension]
+	local type_type = type(file_type)
+
+	local decoded
+	if type_type == "string" then
+		decoded = ddf["encode_" .. file_extension](pb.decode(file_type, contents))
+	elseif type_type == "function" then
+		decoded = file_type(contents)
+	end
+
+	if decoded then
+		return fix_dependency_paths(decoded)
+	end
+end
+
 function M.decompile_files(entries, out_path)
 	for _,e in ipairs(entries) do
-		local ext = utils.get_extension(e.url)
-		local output = e.data
-		
-		if ext == "fontc" then
-			--output = ddf.encond_font(pb.decode("dmRenderDDF.FontDesc", output))
-		elseif ext == "goc" then
-			output = ddf.encode_go(pb.decode(".dmGameObjectDDF.PrototypeDesc", output))
-		elseif ext == "collectionc" then
-			local collection = fix_collection(pb.decode(".dmGameObjectDDF.CollectionDesc", output))
-			output = ddf.encode_collection(collection)
-		elseif ext == "collisionobjectc" then
-			output = ddf.encode_collisionobject(pb.decode(".dmPhysicsDDF.CollisionObjectDesc", output))
-		elseif ext == "soundc" then
-			output = ddf.encode_sound(pb.decode(".dmSoundDDF.SoundDesc", output))
-		elseif ext == "tilemapc" then
-			output = ddf.encode_tilemap(pb.decode("dmGameSystemDDF.TileGrid", output))
-		elseif ext == "texturesetc" then
-			output = safe_decode("dmGameSystemDDF.TextureSet", output)
-		elseif ext == "texturec" then
-			output = safe_decode("dmGraphics.TextureImage", output)
-		end
+		local ext = utils.get_extension(e.url):sub(1,-2)
+		local output = decode_file(e.data, ext) or e.data
 
 		if output then
-			-- Remove trailing c in resource paths
-			output = output:gsub(': "/.-c"', function(s)
-				return s:sub(1,-3) .. '"'
-			end)
 			local path = out_path .. "/decompiled" .. e.url:sub(1,-2)
 			utils.mkdir(utils.enclosing_folder(path))
 			sio.write(path, output)
