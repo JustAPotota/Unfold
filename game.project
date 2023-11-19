@@ -4,9 +4,10 @@ custom_resources = /ddf/proto,/proto
 dependencies#0 = https://github.com/Melsoft-Games/defold-protobuf/archive/master.zip
 dependencies#1 = https://github.com/Vbif/def-diags/archive/refs/heads/master.zip
 dependencies#2 = https://github.com/britzl/defold-lfs/archive/1.0.1.zip
-dependencies#3 = https://github.com/Melsoft-Games/defold-cjson/archive/master.zip
-dependencies#4 = https://github.com/JustAPotota/defold-lz4/archive/v1.1.zip
-dependencies#5 = https://github.com/JustAPotota/ddf/archive/main.zip
+dependencies#3 = https://github.com/JustAPotota/defold-lz4/archive/v1.1.zip
+dependencies#4 = https://github.com/JustAPotota/ddf/archive/main.zip
+dependencies#5 = https://github.com/Insality/druid/archive/refs/tags/0.11.0.zip
+dependencies#6 = https://github.com/d954mas/defold-utf8/archive/master.zip
 
 [bootstrap]
 main_collection = /main/main.collectionc

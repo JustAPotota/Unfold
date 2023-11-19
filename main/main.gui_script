@@ -2,10 +2,10 @@ local unfold = require("unfold")
 local sio = require("sio")
 local utils = require("utils")
 
-local function get_nodes(l)
+local function get_nodes(ids)
 	local nodes = {}
-	for _,v in ipairs(l) do
-		nodes[v] = gui.get_node(v)
+	for _,id in ipairs(ids) do
+		nodes[id] = gui.get_node(id)
 	end
 	return nodes
 end
@@ -15,6 +15,29 @@ local function autofit_text(node)
 	local text_metrics = gui.get_text_metrics_from_node(node)
 	local scale = math.min(1, gui.get_size(node).x / text_metrics.width)
 	gui.set_scale(node, vmath.vector3(scale, scale, scale))
+end
+
+local function set_text_truncated(node, text)
+	local node_width = gui.get_size(node).x
+
+	local font_name = gui.get_font(node)
+	local font = gui.get_font_resource(font_name)
+	local metrics = resource.get_text_metrics(font, text)
+
+	if metrics.width <= node_width then
+		gui.set_text(node, text)
+		return
+	end
+
+	local characters_cut = 0
+	while metrics.width > node_width do
+		characters_cut = characters_cut + 1
+		text = text:sub(characters_cut + 1)
+		local new_text = "..." .. text
+		metrics = resource.get_text_metrics(font, new_text)
+	end
+
+	gui.set_text(node, "..." .. text)
 end
 
 -- https://github.com/andsve/dirtylarry/blob/master/dirtylarry/dirtylarry.lua#L22
@@ -37,7 +60,6 @@ local function hit_test(node, action_id, action)
 	return touch and hit
 end
 
--- Convert hex color code to vector4
 local function hex_to_v4(h)
 	h = string.match(h, "%x%x%x%x%x%x")
 	local r = tonumber(h:sub(1,2), 16)/255
@@ -88,14 +110,28 @@ local function tab(self, page, action_id, action)
 end
 ----------------------------------
 
+local TEXT_COLOR_NORMAL = vmath.vector4(1)
+local TEXT_COLOR_ERROR = hex_to_v4("#DB2B00")
 local function set_status(node, text, error)
 	if error then
-		gui.set_color(node, vmath.vector4(0.86, 0.17, 0, 1))
+		gui.set_color(node, TEXT_COLOR_ERROR)
 	else
-		gui.set_color(node, vmath.vector4(1, 1, 1, 1))
+		gui.set_color(node, TEXT_COLOR_NORMAL)
 	end
 	gui.set_text(node, text)
 	autofit_text(node)
+end
+
+local function is_missing_game_files(path)
+	local required = {"game.arci", "game.arcd", "game.dmanifest"}
+	local missing = {}
+	for _, file_name in ipairs(required) do
+		if not utils.file_exists(path .. "/" .. file_name) then
+			table.insert(missing, file_name)
+		end
+	end
+
+	return #missing > 0, missing
 end
 
 local function validate_bundle(path)
@@ -112,7 +148,7 @@ function init(self)
 	msg.post(".", "acquire_input_focus")
 	msg.post("@render:", "clear_color", {color = vmath.vector4(0.07, 0.07, 0.07, 1)})
 
-	self.nodes = get_nodes({"bundle_path_text", "output_path_text", "export_status", "import_input_path_text", "import_status"})
+	self.nodes = get_nodes({"open_game_status", "output_path_text", "export_status", "import_input_path_text", "import_status"})
 
 	self.pages = {
 		setup = gui.get_node("setup"),
@@ -127,12 +163,23 @@ function on_input(self, action_id, action)
 	-- Setup --------------------------
 	tab(self, "setup", action_id, action)
 
-	button(self, "select_bundle", "#2b2b2b", "#363636", action_id, action, function(self)
+	button(self, "open_game_button", "#0091ea", "#00b0ff", action_id, action, function(self)
 		local code, path = diags.open_folder()
 		if code == 1 then
-			self.bundle_path = utils.to_unix(path)
-			gui.set_text(self.nodes.bundle_path_text, path)
-			autofit_text(self.nodes.bundle_path_text)
+			local path = utils.to_unix(path)
+			print("Selected game path: " .. path)
+			local is_missing_files, file_names = is_missing_game_files(path)
+			if is_missing_files then
+				pprint("Failed to find game files", file_names)
+				local status_text = "Invalid game folder! These files weren't found:"
+				for _, name in ipairs(file_names) do
+					status_text = status_text .. "\n" .. name
+				end
+				gui.set_text(self.nodes.open_game_status, status_text)
+			else
+				gui.set_text(self.nodes.open_game_status, "")
+				self.bundle_path = path
+			end
 		end
 	end)
 
@@ -143,9 +190,7 @@ function on_input(self, action_id, action)
 		local code, path = diags.open_folder()
 		if code == 1 then
 			self.output_path = path
-
-			gui.set_text(self.nodes.output_path_text, path)
-			autofit_text(self.nodes.output_path_text)
+			set_text_truncated(self.nodes.output_path_text, path)
 		end
 	end)
 	button(self, "export_button", "#0091ea", "#00b0ff", action_id, action, function(self)

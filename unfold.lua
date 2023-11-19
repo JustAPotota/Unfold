@@ -176,7 +176,7 @@ end
 local function safe_decode(ddf_type, data)
 	local success, v = pcall(pb.decode, ddf_type, data)
 	if success then
-		return cjson.encode(v)
+		return json.encode(v)
 	else
 		print("Error decoding file of type " .. ddf_type .. ":\n" .. v)
 	end

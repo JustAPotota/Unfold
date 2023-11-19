@@ -1,0 +1,154 @@
+syntax = "proto2";
+package dmRigDDF;
+
+import "ddf/ddf_extensions.proto";
+import "ddf/ddf_math.proto";
+
+option java_package = "com.dynamo.rig.proto";
+option java_outer_classname = "Rig";
+
+
+message Bone
+{
+    option (struct_align) = true;
+
+    // 0xFFFFFFFF means no parent
+    required uint32 parent = 1;
+    required uint64 id = 2;         // the bone name hash
+    required string name = 3;       // For easier debugging at runtime
+    required dmMath.Transform local = 4 [(field_align)=true]; // Deprecated/unused (only in unit test=)
+    required dmMath.Transform world = 5 [(field_align)=true]; // Deprecated/unused
+    required dmMath.Transform inverse_bind_pose = 6 [(field_align)=true];
+
+    optional float length = 7 [default = 0];
+}
+
+message IK
+{
+    required uint64 id = 1;
+    required uint32 parent = 2;
+    required uint32 child = 3;
+    required uint32 target = 4;
+    optional bool positive = 5 [default = true];
+    optional float mix = 6 [default = 1.0];
+}
+
+message Skeleton
+{
+    repeated Bone bones = 1;
+    repeated IK iks = 2;
+}
+
+message AnimationTrack
+{
+    required uint64 bone_id = 1;        // the bone name hash
+    // x0, y0, z0, ...
+    repeated float positions = 2;
+    // x0, x0, z0, w0, …
+    repeated float rotations = 3;
+    // x0, y0, z0, …
+    repeated float scale = 4;
+}
+
+message EventKey
+{
+    required float t = 1;
+    optional int32 integer = 2 [default = 0];
+    optional float float = 3 [default = 0.0];
+    optional uint64 string = 4 [default = 0];
+}
+
+message EventTrack
+{
+    required uint64 event_id = 1;
+    repeated EventKey keys = 2;
+}
+
+message RigAnimation
+{
+    required uint64 id = 1;
+    required float duration = 2;
+    required float sample_rate = 3;
+    repeated AnimationTrack tracks = 4;
+    repeated EventTrack event_tracks = 5;
+}
+
+message AnimationSet
+{
+    repeated RigAnimation animations = 1;
+}
+
+message AnimationInstanceDesc
+{
+    required string animation = 1  [(resource)=true];
+}
+
+message AnimationSetDesc
+{
+    repeated AnimationInstanceDesc animations = 1;
+    optional string skeleton = 2;
+}
+
+enum IndexBufferFormat
+{
+    INDEXBUFFER_FORMAT_16 = 0;
+    INDEXBUFFER_FORMAT_32 = 1;
+}
+
+message Mesh
+{
+    required dmMath.Vector3 aabb_min        = 1;
+    required dmMath.Vector3 aabb_max        = 2;
+
+    repeated float positions                = 3;
+    repeated float normals                  = 4;
+    repeated float tangents                 = 5;
+    repeated float colors                   = 6;
+    repeated float texcoord0                = 7;
+    optional uint32 num_texcoord0_components = 8; // max 3
+    repeated float texcoord1                = 9;
+    optional uint32 num_texcoord1_components = 10; // max 3
+
+    optional bytes  indices                 = 11; // indices for interleaved vertex buffer
+    optional IndexBufferFormat indices_format = 12; // format of values in indices
+
+    // w00, w01, w02, w03, w10, … (only specified for skinned meshes)
+    repeated float weights = 13;
+    // i00, i01, i02, i03, i10, … (only specified for skinned meshes)
+    repeated uint32 bone_indices = 14;
+
+    optional uint32 material_index = 15; // index into the mesh set material list
+
+}
+
+message Model // E.g. the Node in the Scene
+{
+    option (struct_align) = true;
+
+    required dmMath.Transform   local       = 1 [(field_align)=true];
+    required uint64             id          = 2;    // E.g. "torso", "head". Or simply "character"
+    repeated Mesh               meshes      = 3;
+    // If set, then this model should be transformed as a child of the bone
+    optional uint64             bone_id     = 4 [default = 0]; // hash of bone id
+}
+
+message MeshSet
+{
+    repeated Model          models = 1; // There may be more than one object in a scene
+    repeated string         materials = 2;
+
+    // List of bone names that represent the order of the bone influences.
+    // Not used for Spine rigs since they don't have support for external skeletons.
+    repeated uint64 bone_list = 3;
+    // Max number of bones used in any of the meshes (in the bone_indices list)
+    optional uint32 max_bone_count = 4;
+}
+
+// Public api
+message RigScene
+{
+    optional string skeleton = 1 [(resource)=true];
+    optional string animation_set = 2 [(resource)=true];
+    required string mesh_set = 3 [(resource)=true];
+    optional string texture_set = 4 [(resource)=true];
+}
