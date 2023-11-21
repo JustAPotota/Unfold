@@ -1,6 +1,7 @@
 local M = {}
 
 -- Modules
+local Array = require("array")
 local sio = require("sio")
 local utils = require("utils")
 local ddf = require("ddf.ddf")
@@ -10,6 +11,9 @@ local protoc = require("pb.protoc")
 protoc.unknown_module = ""
 protoc.unknown_type = ""
 protoc.include_imports = true
+function protoc:unknown_import(module_name)
+	return protoc:parsefile("/proto/" .. M.current_engine_hash .. "/" .. module_name)
+end
 protoc:load(sys.load_resource("/ddf/proto/ddf.proto"))
 protoc:load(sys.load_resource("/proto/resource/liveupdate_ddf.proto"))
 protoc:load(sys.load_resource("/proto/gamesys/texture_set_ddf.proto"))
@@ -17,6 +21,16 @@ protoc:load(sys.load_resource("/proto/gamesys/texture_set_ddf.proto"))
 
 
 -- Helper functions --------------
+local ENGINE_VERSIONS = Array(json.decode(sys.load_resource("/defold_versions.json")))
+function M.get_engine_version(exe_path)
+	local bytes = sio.read(exe_path)
+	return ENGINE_VERSIONS:find(function(version) return bytes:find(version.sha) end)
+end
+
+function M.latest_engine_version()
+	return ENGINE_VERSIONS[1]
+end
+
 function M.read_int(f)
 	local char = f:read(4)
 	local total = ""

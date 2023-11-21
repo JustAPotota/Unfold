@@ -164,11 +164,13 @@ function on_input(self, action_id, action)
 	tab(self, "setup", action_id, action)
 
 	button(self, "open_game_button", "#0091ea", "#00b0ff", action_id, action, function(self)
-		local code, path = diags.open_folder()
+		local code, path = diags.open()
 		if code == 1 then
-			local path = utils.to_unix(path)
-			print("Selected game path: " .. path)
-			local is_missing_files, file_names = is_missing_game_files(path)
+			local exe_path = utils.to_unix(path)
+			local game_path = exe_path:match("^(.+/)[^/]+$")
+			print("Selected game path: " .. game_path)
+
+			local is_missing_files, file_names = is_missing_game_files(game_path)
 			if is_missing_files then
 				pprint("Failed to find game files", file_names)
 				local status_text = "Invalid game folder! These files weren't found:"
@@ -178,7 +180,15 @@ function on_input(self, action_id, action)
 				gui.set_text(self.nodes.open_game_status, status_text)
 			else
 				gui.set_text(self.nodes.open_game_status, "")
-				self.bundle_path = path
+				self.engine_version = unfold.get_engine_version(exe_path)
+				if not self.engine_version then
+					print("Unable to detect engine version, assuming the latest...")
+					self.engine_verison = unfold.latest_engine_version()
+				else
+					print(("Detected engine version %s (%s)"):format(self.engine_version.name, self.engine_version.sha))
+				end
+				self.exe_path = exe_path
+				self.bundle_path = game_path
 			end
 		end
 	end)

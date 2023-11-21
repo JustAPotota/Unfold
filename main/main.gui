@@ -1483,7 +1483,7 @@ nodes {
     w: 1.0
   }
   size {
-    x: 200.0
+    x: 220.0
     y: 50.0
     z: 0.0
     w: 1.0
@@ -1542,7 +1542,7 @@ nodes {
     w: 1.0
   }
   size {
-    x: 200.0
+    x: 210.0
     y: 50.0
     z: 0.0
     w: 1.0
@@ -1555,7 +1555,7 @@ nodes {
   }
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
-  text: "Open game folder..."
+  text: "Open game executable..."
   font: "system_font"
   id: "open_game_button_text"
   xanchor: XANCHOR_NONE
